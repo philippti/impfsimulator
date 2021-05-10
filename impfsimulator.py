@@ -12,18 +12,17 @@ daily_capacity = 0  # Tägliche Impstoffkapazität
 df = pd.concat([patFrame, vacFrame], axis=1, ignore_index=True)  # Kombiniere beide Frames
 
 patient_queue = PriorityQueue()  # Erstelle Queue für alle Patienten
-first_vac_queue = PriorityQueue()  # Erstelle Queue für Patienten mit erhaltener Erstimpfung
-second_vac_queue = PriorityQueue()  # Erstelle Queue für Patienten mit erhaltener Zweitimpfung
-
+print(df.head())
 patients = list(zip(df[1].values, df[2].values))
 
 patient_queue.put((0, patients))
-
-for days in df[3].iteritems():
+print(patient_queue.get_nowait())
+for days in df[3].iteritems():  # Berechne Tägliche Kapazität
     if pd.notnull(days[1]):
         daily_capacity = df[4].values + df[5].values + df[6].values
 
 daily_capacity = [int(x) for x in daily_capacity if str(x) != "nan"]  # Data Cleansing
+
 
 def numberlist(nums, limit):
     i = 0
@@ -31,7 +30,15 @@ def numberlist(nums, limit):
         i += 1
     return i
 
-print(f"Alle Patienten sind nach {numberlist(daily_capacity, 60000)} Tagen geimpft.")
+def totalVacCap(day):
+    hi = 0
+    week1 = 0
+    for i in daily_capacity:
+        if hi <= day:
+            hi += 1
+            week1 += i
+    print(week1)
+print(f"Alle Patienten sind nach {numberlist(daily_capacity, len(patients) * 2)} Tagen geimpft.")
 
 vac5 = 0
 counter = 0
@@ -40,7 +47,3 @@ for element in daily_capacity:
     if counter <= 5:
         vac5 += element
 print(f"Nach fünf Tagen sind die Patienten 0 bis {vac5 - 1} geimpft.")
-
-
-
-
