@@ -16,6 +16,7 @@ c) wann erhält Patient 17.909 die Zweitimpfung?
 # Szenario B:
 
 Simulationsbedingung: es gibt eine Priorisierung nach zwei Risikogruppen:
+
 Risikogruppe 1 (R1): Ü75 und Vorerkrankung vorhanden
 Risikogruppe 2 (R2): Ü60 oder Vorerkrankung vorhanden
 
