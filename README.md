@@ -40,6 +40,7 @@ f) wie sehen diese Zahlen von b-d im Vergleich zu a-c aus Szenario A aus?
 # Szenatio C:
 
 Simulationsbedingung 1: es gilt die gleiche Priorisierung wie in Szenario B
+
 Simulationsbedingung 2: An Tag 100 wird die Zulassung für Impfstoffanbieter B
 zurückgerufen. Keine Patienten dürfen mehr mit dem Vakzin geimpft werden.
 
