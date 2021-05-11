@@ -94,7 +94,7 @@ def main(patient_queue):
     pprint.pprint(low_priority_patients)
 
     # Every day's relevant data is available in that report.
-    # You can also call list on run_vaccinations and get the reports for every day so you can run analyses on them
+    # You can also call list on run_vaccinations and get the reports for every day so you can run analyses on them @Shara
     # Converting this to be more efficient using pandas/dataframes is an option, but only if Shara wants to :)
 
 
