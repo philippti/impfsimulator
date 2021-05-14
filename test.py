@@ -1,8 +1,9 @@
 import pandas as pd
-import matplotlib
+from matplotlib import pyplot as plt
 from glob import glob
 import random
-from collections import Counter
+from collections import Counter, defaultdict
+from functools import lru_cache
 
 
 """PROCESS GIVEN DATA"""
@@ -13,7 +14,7 @@ vacFrame = pd.read_csv("data_file_2.csv")
 df = pd.concat([patFrame, vacFrame], axis=1, ignore_index=True)  # Concatenate both dataframes
 
 """CREATE QUEUES"""
-patient_queue = []  # List of all patients
+patient_queue = []  # List for all patients
 
 """SEGMENT PEOPLE INTO PRIORITIES"""
 patients = []
@@ -43,7 +44,11 @@ daily_vac3_capacity = [int(x) for x in vac3_capacity if str(x) != "nan"]  # Data
 
 total_capacity_dict = [{"A": a, "B": b, "C": c} for (a, b, c) in
                        zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
-print(total_capacity_dict)
+#print(total_capacity_dict)
+
+"""ADDITIONAL DECLARATIONS"""
+first_vac_counter = {i:0 for i in range(305)}
+sec_vac_counter = {i:0 for i in range(305)}
 
 
 def prioritize_eligible(patients, day):
@@ -78,10 +83,12 @@ def run_vaccinations(days, patient_queue):
                 # Administer the vaccine.
                 total_vac_capacity[provider] -= 1
                 patient["first_vaccination_date"] = day
+                first_vac_counter[day] += 1
             elif not patient["second_vaccination_date"] and total_vac_capacity[patient["vaccine_provider"]] > 0:
                 # Administer the vaccine a second time.
                 total_vac_capacity[patient["vaccine_provider"]] -= 1
                 patient["second_vaccination_date"] = day
+                sec_vac_counter[day] += 1
 
     return patient_queue, total_vac_capacity  # A deep copy of whatever data we want, I'd recommend the day, the patients list, and the vaccine capacities list.
 
@@ -98,4 +105,10 @@ def main(patient_queue):
     # Converting this to be more efficient using pandas/dataframes is an option, but only if Shara wants to :)
 
 
-main(patient_queue)
+#main(patient_queue)
+lru_cache()
+run_vaccinations(305, patient_queue)
+plt.plot(range(305),first_vac_counter.values())
+plt.plot(range(305),sec_vac_counter.values())
+#for patient in patient_queue
+#plt.plot(range)
