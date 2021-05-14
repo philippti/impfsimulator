@@ -5,7 +5,6 @@ import random
 from collections import Counter, defaultdict
 from functools import lru_cache
 
-
 """PROCESS GIVEN DATA"""
 stock_files = sorted(glob("data/data_file_*.csv"))
 patFrame = pd.read_csv("data_file_1.csv")
@@ -26,25 +25,39 @@ for index, row in df[[0, 1, 2]].iterrows():
                      "second_vaccination_date": None,
                      "vaccine_provider": None})
 
-for patient in patients:
-    if patient["Patient Age"] >= 75 and patient["Has Precondition"] == 1:
-        patient_queue.append((0, patient))
-    elif patient["Patient Age"] >= 60 or patient["Has Precondition"] == 1:
-        patient_queue.append((1, patient))
+def setPriority(b=True):
+    if b == True:
+        prio0, prio1, prio2 = 0,1,2
     else:
-        patient_queue.append((2, patient))
-"""ASSIGN DAILY CAPACITY"""
-vac1_capacity = df[4].values  # Vac A Capacity per day
-vac2_capacity = df[5].values  # Vac B Capacity per day
-vac3_capacity = df[6].values  # Vac C Capacity per day
+        prio0, prio1, prio2 = 0,0,0
 
-daily_vac1_capacity = [int(x) for x in vac1_capacity if str(x) != "nan"]  # Data Cleansing
-daily_vac2_capacity = [int(x) for x in vac2_capacity if str(x) != "nan"]  # Data Cleansing
-daily_vac3_capacity = [int(x) for x in vac3_capacity if str(x) != "nan"]  # Data Cleansing
+    for patient in patients:
+        if patient["Patient Age"] >= 75 and patient["Has Precondition"] == 1:
+            patient_queue.append((prio0, patient))
+        elif patient["Patient Age"] >= 60 or patient["Has Precondition"] == 1:
+            patient_queue.append((prio1, patient))
+        else:
+            patient_queue.append((prio2, patient))
 
-total_capacity_dict = [{"A": a, "B": b, "C": c} for (a, b, c) in
-                       zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
-#print(total_capacity_dict)
+def setCapacity(x=1):
+    """ASSIGN DAILY CAPACITY"""
+    vac1_capacity = df[4].values  # Vac A Capacity per day
+    vac2_capacity = df[5].values  # Vac B Capacity per day
+    vac3_capacity = df[6].values  # Vac C Capacity per day
+
+    daily_vac1_capacity = [int(x) for x in vac1_capacity if str(x) != "nan"]  # Data Cleansing
+    daily_vac2_capacity = [int(x) for x in vac2_capacity if str(x) != "nan"]  # Data Cleansing
+    daily_vac3_capacity = [int(x) for x in vac3_capacity if str(x) != "nan"]  # Data Cleansing
+    if x == 2:
+        daily_vac2_capacity[100:] = [0 for i in range(len(daily_vac2_capacity[100:]))]
+    elif x == 3:
+        daily_vac2_capacity[100:120] = [0 for i in range(len(daily_vac2_capacity[100:120]))]
+    else:
+        pass
+
+    total_capacity_dict = [{"A": a, "B": b, "C": c} for (a, b, c) in
+                        zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
+    #print(total_capacity_dict)
 
 """ADDITIONAL DECLARATIONS"""
 first_vac_counter = {i:0 for i in range(305)}
@@ -106,7 +119,8 @@ def main(patient_queue):
 
 
 #main(patient_queue)
-lru_cache()
+setPriority(True)
+setCapacity(2)
 run_vaccinations(305, patient_queue)
 plt.plot(range(305),first_vac_counter.values())
 plt.plot(range(305),sec_vac_counter.values())
