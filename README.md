@@ -37,7 +37,7 @@ e) Wann erhalten jeweils alle Patienten aus Risikogruppe 1 und 2 ihre Erstimpfun
 f) wie sehen diese Zahlen von b-d im Vergleich zu a-c aus Szenario A aus?
 
 
-# Szenatio C:
+# Szenario C:
 
 Simulationsbedingung 1: es gilt die gleiche Priorisierung wie in Szenario B
 
