@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 from glob import glob
 import random
 from collections import Counter, defaultdict
-from functools import lru_cache
 
 """PROCESS GIVEN DATA"""
 stock_files = sorted(glob("data/data_file_*.csv"))
@@ -25,10 +24,10 @@ for index, row in df[[0, 1, 2]].iterrows():
                      "second_vaccination_date": None,
                      "vaccine_provider": None})
 
-def setPriority(b=True):
+def setPriority(b=True): #True= mit Prio, False= ohne Prio
     if b == True:
         prio0, prio1, prio2 = 0,1,2
-    else:
+    elif b == False:
         prio0, prio1, prio2 = 0,0,0
 
     for patient in patients:
@@ -39,7 +38,7 @@ def setPriority(b=True):
         else:
             patient_queue.append((prio2, patient))
 
-def setCapacity(x=1):
+def setCapacity(x=1): #1= default, 2= B ab Tag 100 nicht verfügbar, 3= B Tag 100-120 nicht verfügbar
     """ASSIGN DAILY CAPACITY"""
     vac1_capacity = df[4].values  # Vac A Capacity per day
     vac2_capacity = df[5].values  # Vac B Capacity per day
@@ -49,15 +48,15 @@ def setCapacity(x=1):
     daily_vac2_capacity = [int(x) for x in vac2_capacity if str(x) != "nan"]  # Data Cleansing
     daily_vac3_capacity = [int(x) for x in vac3_capacity if str(x) != "nan"]  # Data Cleansing
     if x == 2:
-        daily_vac2_capacity[100:] = [0 for i in range(len(daily_vac2_capacity[100:]))]
+        daily_vac2_capacity[99:] = [0 for i in range(len(daily_vac2_capacity[99:]))]
     elif x == 3:
-        daily_vac2_capacity[100:120] = [0 for i in range(len(daily_vac2_capacity[100:120]))]
+        daily_vac2_capacity[99:120] = [0 for i in range(len(daily_vac2_capacity[99:120]))]
     else:
         pass
 
     total_capacity_dict = [{"A": a, "B": b, "C": c} for (a, b, c) in
                         zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
-    #print(total_capacity_dict)
+    return total_capacity_dict
 
 """ADDITIONAL DECLARATIONS"""
 first_vac_counter = {i:0 for i in range(305)}
@@ -119,10 +118,23 @@ def main(patient_queue):
 
 
 #main(patient_queue)
-setPriority(True)
-setCapacity(2)
+setPriority(False)
+total_capacity_dict = setCapacity()
 run_vaccinations(305, patient_queue)
 plt.plot(range(305),first_vac_counter.values())
 plt.plot(range(305),sec_vac_counter.values())
+print("All patients have received their 2nd vacc on day", list(sec_vac_counter.values()).index(0))
 #for patient in patient_queue
 #plt.plot(range)
+
+def szenarioA():
+    # Szenario A: 
+
+print("Simulationsbedingung: es gibt keine Priorisierung der Patienten nach Risikogruppen und entsprechend nur eine Warteliste\n")
+
+print("a) Nach wie vielen Tagen sind alle Patienten geimpft?\n")
+print("Am Tag", list(first_vac_counter.values()).index(0), "haben alle ihre erste Impfung erhalten.\n")
+
+print("b) Welche Patienten werden innerhalb der ersten 5 Tage geimpft?\n")
+
+c) wann erhält Patient 17.909 die Zweitimpfung?
