@@ -26,17 +26,16 @@ for index, row in df[[0, 1, 2]].iterrows():
 
 def setPriority(b=True): #True= mit Prio, False= ohne Prio
     if b == True:
-        prio0, prio1, prio2 = 0,1,2
+        for patient in patients:
+            if patient["Patient Age"] >= 75 and patient["Has Precondition"] == 1:
+                patient_queue.append((0, patient))
+            elif patient["Patient Age"] >= 60 or patient["Has Precondition"] == 1:
+                patient_queue.append((1, patient))
+            else:
+                patient_queue.append((2, patient))
     elif b == False:
-        prio0, prio1, prio2 = 0,0,0
-
-    for patient in patients:
-        if patient["Patient Age"] >= 75 and patient["Has Precondition"] == 1:
-            patient_queue.append((prio0, patient))
-        elif patient["Patient Age"] >= 60 or patient["Has Precondition"] == 1:
-            patient_queue.append((prio1, patient))
-        else:
-            patient_queue.append((prio2, patient))
+        for patient in patients:
+            patient_queue.append(0, patient)
 
 def setCapacity(x=1): #1= default, 2= B ab Tag 100 nicht verfügbar, 3= B Tag 100-120 nicht verfügbar
     """ASSIGN DAILY CAPACITY"""
@@ -101,7 +100,7 @@ def run_vaccinations(days, patient_queue):
                 total_vac_capacity[patient["vaccine_provider"]] -= 1
                 patient["second_vaccination_date"] = day
                 sec_vac_counter[day] += 1
-
+    
     return patient_queue, total_vac_capacity  # A deep copy of whatever data we want, I'd recommend the day, the patients list, and the vaccine capacities list.
 
 
@@ -130,11 +129,11 @@ print("All patients have received their 2nd vacc on day", list(sec_vac_counter.v
 def szenarioA():
     # Szenario A: 
 
-print("Simulationsbedingung: es gibt keine Priorisierung der Patienten nach Risikogruppen und entsprechend nur eine Warteliste\n")
+    print("Simulationsbedingung: es gibt keine Priorisierung der Patienten nach Risikogruppen und entsprechend nur eine Warteliste\n")
 
-print("a) Nach wie vielen Tagen sind alle Patienten geimpft?\n")
-print("Am Tag", list(first_vac_counter.values()).index(0), "haben alle ihre erste Impfung erhalten.\n")
+    print("a) Nach wie vielen Tagen sind alle Patienten geimpft?\n")
+    print("Am Tag", list(first_vac_counter.values()).index(0), "haben alle ihre erste Impfung erhalten.\n")
 
-print("b) Welche Patienten werden innerhalb der ersten 5 Tage geimpft?\n")
+    print("b) Welche Patienten werden innerhalb der ersten 5 Tage geimpft?\n")
 
-c) wann erhält Patient 17.909 die Zweitimpfung?
+    print("c) wann erhält Patient 17.909 die Zweitimpfung?")
