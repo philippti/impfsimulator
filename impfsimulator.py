@@ -25,8 +25,8 @@ for index, row in df[[0, 1, 2]].iterrows():
                      "vaccine_provider": None})
 
 
-def set_priority(b = bool): # True = w/ prio, False = w/o prio
-    if b == True:
+def set_priority(b=bool):  # True = w/ prio, False = w/o prio
+    if b:
         for patient in patients:
             if patient["Patient Age"] >= 75 and patient["Has Precondition"] == 1:
                 patient_queue.append((0, patient))
@@ -34,12 +34,12 @@ def set_priority(b = bool): # True = w/ prio, False = w/o prio
                 patient_queue.append((1, patient))
             else:
                 patient_queue.append((2, patient))
-    elif b == False:
+    elif not b:
         for patient in patients:
             patient_queue.append((0, patient))
 
 
-def set_capacity(x): # 2 = B not available starting on day 100, 3 = B not available for days 100-120.
+def set_capacity(x):  # 2 = B not available starting on day 100, 3 = B not available for days 100-120.
     """ASSIGN DAILY CAPACITY"""
     vac1_capacity = df[4].values  # Vac A Capacity per day
     vac2_capacity = df[5].values  # Vac B Capacity per day
@@ -56,7 +56,7 @@ def set_capacity(x): # 2 = B not available starting on day 100, 3 = B not availa
         pass
 
     total_capacity_dict = [{"A": a, "B": b, "C": c} for (a, b, c) in
-                        zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
+                           zip(daily_vac1_capacity, daily_vac2_capacity, daily_vac3_capacity)]
     return total_capacity_dict
 
 
@@ -65,7 +65,7 @@ def prioritize_eligible(patients, day):
     Yields a random eligible patient, starting with the highest priority patients and going down.
     Only hands back patients who are eligible for their first vaccine or who have waited long enough to be eligble for their second vaccine.
     '''
-    patients = sorted(patients, key=lambda p: p[0]) # Sorts patients according to given priority.  
+    patients = sorted(patients, key=lambda p: p[0])  # Sorts patients according to given priority.
     for patient_priority, patient in patients:
         if patient["first_vaccination_date"] is not None and patient["second_vaccination_date"] is not None:
             continue
@@ -79,7 +79,7 @@ def run_vaccinations(days, patient_queue, total_capacity_dict, first_vac_counter
     Main simulator, iterates over patient_queue and assigns vaccination dates and providers.
     '''
     total_vac_capacity = Counter({"A": 0, "B": 0, "C": 0})
-    for element in patients: # Reset values for successive execution of simulations.  
+    for element in patients:  # Reset values for successive execution of simulations.
         element['first_vaccination_date'] = None
         element['second_vaccination_date'] = None
         element['vaccine_provider'] = None
@@ -104,22 +104,21 @@ def run_vaccinations(days, patient_queue, total_capacity_dict, first_vac_counter
                 total_vac_capacity[patient["vaccine_provider"]] -= 1
                 patient["second_vaccination_date"] = day
                 sec_vac_counter[day] += 1
-    
+
     return patient_queue, total_vac_capacity  # A deep copy of whatever data we want, I'd recommend the day, the patients list, and the vaccine capacities list.
 
 
 def visualization():
-    
     labels = 'Risikogruppe 1', 'Risikogruppe 2', 'Riskiogruppe 3'
-    patients_zero_prio = [x["Patient ID"]  for prio, x in patient_queue if prio == 0]
-    patients_one_prio = [x["Patient ID"]  for prio, x in patient_queue if prio == 1]
-    patients_two_prio = [x["Patient ID"]  for prio, x in patient_queue if prio == 2]
-    sizes = [len(patients_zero_prio),len(patients_one_prio), len(patients_two_prio)]
-    
+    patients_zero_prio = [x["Patient ID"] for prio, x in patient_queue if prio == 0]
+    patients_one_prio = [x["Patient ID"] for prio, x in patient_queue if prio == 1]
+    patients_two_prio = [x["Patient ID"] for prio, x in patient_queue if prio == 2]
+    sizes = [len(patients_zero_prio), len(patients_one_prio), len(patients_two_prio)]
+
     fig, ax1 = plt.subplots()
     ax1.pie(sizes, labels=labels, autopct='%1.2f%%',
-        shadow=True)
-    
+            shadow=True)
+
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     plt.title("Wie viel Prozent der Bevölkerung sind in den \n jeweiligen Risikogruppen\n")
     plt.show()
@@ -129,58 +128,66 @@ def szenario_A():
     # Szenario A: No priorization
 
     """ADDITIONAL DECLARATIONS"""
-    first_vac_counter = {i:0 for i in range(487)}
-    sec_vac_counter = {i:0 for i in range(487)}
+    first_vac_counter = {i: 0 for i in range(487)}
+    sec_vac_counter = {i: 0 for i in range(487)}
 
     set_priority(False)
-    total_capacity_dict= set_capacity(1)
+    total_capacity_dict = set_capacity(1)
     run_vaccinations(487, patient_queue, total_capacity_dict, first_vac_counter, sec_vac_counter)
 
-    print("\nSimulationsbedingung: es gibt keine Priorisierung der Patienten nach Risikogruppen und entsprechend nur eine Warteliste")
+    print(
+        "\nSimulationsbedingung: es gibt keine Priorisierung der Patienten nach Risikogruppen und entsprechend nur eine Warteliste")
 
     print("\na) Nach wie vielen Tagen sind alle Patienten geimpft?")
     print("\nAn Tag", list(first_vac_counter.values()).index(0), "haben alle ihre erste Impfung erhalten.")
-    print("\nAlle Patienten haben ihre Zweitimpfung an Tag:", max(patient["second_vaccination_date"] for patient in patients if patient["second_vaccination_date"]))
+    print("\nAlle Patienten haben ihre Zweitimpfung an Tag:",
+          max(patient["second_vaccination_date"] for patient in patients if patient["second_vaccination_date"]))
 
     print("\nb) Welche Patienten werden innerhalb der ersten 5 Tage geimpft?")
-    patients_first_five_days = [x["Patient ID"]  for prio, x in patient_queue if x["first_vaccination_date"] <= 4]
-    print('\nNach fünf Tagen wurden Patienten:', patients_first_five_days ,"geimpft")
+    patients_first_five_days = [x["Patient ID"] for prio, x in patient_queue if x["first_vaccination_date"] <= 4]
+    print('\nNach fünf Tagen wurden Patienten:', patients_first_five_days, "geimpft")
     print("\nc) wann erhält Patient 17.909 die Zweitimpfung?")
 
-    print('\nPatient Nr', patients[17909]["Patient ID"], 'erhält an Tag', patients[17909]["second_vaccination_date"], 'seine zweite Impfung')
+    print('\nPatient Nr', patients[17909]["Patient ID"], 'erhält an Tag', patients[17909]["second_vaccination_date"],
+          'seine zweite Impfung')
 
 
 def szenario_B():
     # Szenario B: Prioritizing according to risk groups 1 and 2
 
     """ADDITIONAL DECLARATIONS"""
-    first_vac_counter = {i:0 for i in range(487)}
-    sec_vac_counter = {i:0 for i in range(487)}
+    first_vac_counter = {i: 0 for i in range(487)}
+    sec_vac_counter = {i: 0 for i in range(487)}
 
     set_priority(True)
     total_capacity_dict = set_capacity(1)
 
-    run_vaccinations(487, patient_queue,total_capacity_dict, first_vac_counter, sec_vac_counter)
+    run_vaccinations(487, patient_queue, total_capacity_dict, first_vac_counter, sec_vac_counter)
 
-    print("\n a) Erstellen Sie eine geeignete Visualisierung der Bevölkerungsanteile in den verschiedenen Risikogruppen (aus den Datensets)")
+    print(
+        "\n a) Erstellen Sie eine geeignete Visualisierung der Bevölkerungsanteile in den verschiedenen Risikogruppen (aus den Datensets)")
     visualization()
-    
+
     print("\n b) Nach wie vielen Tagen sind alle Patienten geimpft?")
     print("\n An Tag", list(first_vac_counter.values()).index(0), "haben alle ihre erste Impfung erhalten.")
-    print("\n Alle Patienten haben ihre Zweitimpfung an Tag:", max(patient["second_vaccination_date"] for patient in patients if patient["second_vaccination_date"]))
-    
+    print("\n Alle Patienten haben ihre Zweitimpfung an Tag:",
+          max(patient["second_vaccination_date"] for patient in patients if patient["second_vaccination_date"]))
+
     print("\n c) Welche Patienten werden innerhalb der ersten 5 Tage geimpft?")
-    patients_first_five_days = [x["Patient ID"]  for prio, x in patient_queue if x["first_vaccination_date"] <= 4]
-    print('\n Nach fünf Tagen wurden Patienten:', patients_first_five_days ,"geimpft")
+    patients_first_five_days = [x["Patient ID"] for prio, x in patient_queue if x["first_vaccination_date"] <= 4]
+    print('\n Nach fünf Tagen wurden Patienten:', patients_first_five_days, "geimpft")
 
     print("\n d) Wann erhält Patient 17.909 die Zweitimpfung?")
-    
-    print('\n Patient Nr', patients[17909]["Patient ID"], 'erhält an Tag', patients[17909]["second_vaccination_date"], 'seine zweite Impfung')
-    
+
+    print('\n Patient Nr', patients[17909]["Patient ID"], 'erhält an Tag', patients[17909]["second_vaccination_date"],
+          'seine zweite Impfung')
+
     print('\n e) Wann erhalten jeweils alle Patienten aus Risikogruppe 1 und 2 ihre Erstimpfung?')
 
-    print('\n Aus Risikogruppe 1 wurden alle nach Tag',max(patient['first_vaccination_date'] for prio, patient in patient_queue if prio == 0),'geimpft')
-    print('\n Aus Risikogruppe 2 wurden alle nach Tag',max(patient['first_vaccination_date'] for prio, patient in patient_queue if prio == 1),'geimpft')
+    print('\n Aus Risikogruppe 1 wurden alle nach Tag',
+          max(patient['first_vaccination_date'] for prio, patient in patient_queue if prio == 0), 'geimpft')
+    print('\n Aus Risikogruppe 2 wurden alle nach Tag',
+          max(patient['first_vaccination_date'] for prio, patient in patient_queue if prio == 1), 'geimpft')
 
     print('\n f) Wie sehen diese Zahlen von b-d im Vergleich zu a-c aus Szenario A aus?')
     print('''\n 
@@ -192,8 +199,8 @@ def szenario_B():
 
 def szenario_Ca():
     """ADDITIONAL DECLARATIONS"""
-    first_vac_counter = {i:0 for i in range(487)}
-    sec_vac_counter = {i:0 for i in range(487)}
+    first_vac_counter = {i: 0 for i in range(487)}
+    sec_vac_counter = {i: 0 for i in range(487)}
 
     set_priority(True)
     total_capacity_dict = set_capacity(2)
@@ -205,8 +212,8 @@ def szenario_Ca():
 
 def szenario_Cb():
     """ADDITIONAL DECLARATIONS"""
-    first_vac_counter = {i:0 for i in range(487)}
-    sec_vac_counter = {i:0 for i in range(487)}
+    first_vac_counter = {i: 0 for i in range(487)}
+    sec_vac_counter = {i: 0 for i in range(487)}
 
     set_priority(True)
     total_capacity_dict = set_capacity(3)
